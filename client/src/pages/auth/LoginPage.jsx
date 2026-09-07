@@ -120,13 +120,22 @@ export const LoginPage = ({ onNavigateToForgot }) => {
                   />
                   <span className="text-xs font-medium text-slate-600">Remember me</span>
                 </label>
+                {onNavigateToForgot && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToForgot}
+                    className="text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                )}
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/20 transition-all focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
+              className="w-full flex items-center justify-center py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/20 transition-all focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60 cursor-pointer"
             >
               {loading ? (
                 <span>Signing in...</span>
@@ -135,6 +144,55 @@ export const LoginPage = ({ onNavigateToForgot }) => {
               )}
             </button>
           </form>
+
+          {/* Quick Demo Credentials */}
+          <div className="mt-6 pt-5 border-t border-slate-100">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 text-center mb-2.5">
+              Quick Test Sign In
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@company.com');
+                  setPassword('admin123');
+                }}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors text-center"
+              >
+                👑 Super Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('hr.admin@company.com');
+                  setPassword('employee123');
+                }}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors text-center"
+              >
+                🏢 HR Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('manager.eng@company.com');
+                  setPassword('manager123');
+                }}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-center"
+              >
+                👔 Manager
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('marcus.vance@company.com');
+                  setPassword('employee123');
+                }}
+                className="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-center"
+              >
+                👤 Employee
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

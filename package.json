@@ -6,6 +6,16 @@
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
     "seed": "cd server && npm run seed",
-    "install:all": "cd server && npm install && cd ../client && npm install"
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm install && npm run build"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.3.0",
+    "uuid": "^10.0.0"
   }
 }

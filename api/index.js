@@ -64,7 +64,7 @@ app.all('/api/*', (req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
+  res.status(500).json({ error: err.message || 'Internal server error', details: err.stack });
 });
 
 export default app;

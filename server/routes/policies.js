@@ -11,9 +11,17 @@ const __dirname = path.dirname(__filename);
 const router = express.Router();
 
 // Upload Directory Setup
-const uploadsDir = path.join(__dirname, '../uploads/policies');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const uploadsDir = isVercel
+  ? path.join('/tmp', 'uploads', 'policies')
+  : path.join(__dirname, '../uploads/policies');
+
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Could not create policies uploads directory:', err.message);
 }
 
 // Multer Storage Configuration
@@ -350,7 +358,11 @@ router.post('/', authenticateToken, requireRole(['super_admin', 'hr_admin']), up
       const placeholderPath = path.join(uploadsDir, placeholderName);
       
       const samplePdfContent = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 200 >>\nstream\nBT /F1 18 Tf 50 740 Td (${policy_name}) Tj /F1 12 Tf 0 -30 Td (Version ${version} - Effective ${effective_date}) Tj /F1 10 Tf 0 -30 Td (${description || 'Official company policy document.'}) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000244 00000 n\n0000000450 00000 n\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n550\n%%EOF`;
-      fs.writeFileSync(placeholderPath, samplePdfContent);
+      try {
+        fs.writeFileSync(placeholderPath, samplePdfContent);
+      } catch (err) {
+        console.warn('Could not write placeholder policy file:', err.message);
+      }
 
       fileInfo = {
         file_name: placeholderName,

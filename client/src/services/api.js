@@ -61,7 +61,14 @@ class ApiClient {
 
     try {
       const res = await fetch(url, config);
-      const data = await res.json().catch(() => ({}));
+      let data = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json().catch(() => ({}));
+      } else {
+        const text = await res.text().catch(() => '');
+        data = { error: text || `Request failed with status ${res.status}` };
+      }
 
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
@@ -70,7 +77,7 @@ class ApiClient {
             // this.setToken(null);
           }
         }
-        throw new Error(data.error || `Request failed with status ${res.status}`);
+        throw new Error(data.error || data.message || `Request failed with status ${res.status}`);
       }
 
       return data;

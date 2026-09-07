@@ -4,55 +4,12 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_FILE = path.join(__dirname, 'data.json');
+import defaultData from './seedData.js';
 
-const defaultData = {
-  users: [],
-  departments: [],
-  designations: [],
-  employees: [],
-  attendance: [],
-  leave_balances: [],
-  leave_requests: [],
-  holidays: [],
-  announcements: [],
-  notifications: [],
-  emergency_contacts: [],
-  employment_history: [],
-  employee_documents: [],
-  kpi_categories: [],
-  kpi_templates: [],
-  kpi_periods: [],
-  kpi_assignments: [],
-  kpi_progress: [],
-  kpi_reviews: [],
-  kpi_evidence: [],
-  kpi_audit_logs: [],
-  policy_categories: [],
-  company_policies: [],
-  company_policy_versions: [],
-  settings: {
-    company_name: 'Quantira Technologies',
-    company_email: 'hr@quantiratechnologies.com',
-    company_phone: '+1 (555) 019-2834',
-    company_address: '100 Innovation Blvd, Suite 400, Tech City, CA',
-    work_start_time: '09:00',
-    work_end_time: '18:00',
-    standard_hours: 8,
-    half_day_hours: 4,
-    weekend_days: ['Saturday', 'Sunday'],
-    casual_leave_quota: 12,
-    sick_leave_quota: 10,
-    paid_leave_quota: 15,
-    unpaid_leave_quota: 30,
-    demographic_fields: [
-      { id: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Non-Binary', 'Prefer not to say'], enabled: true, employee_editable: true },
-      { id: 'marital_status', label: 'Marital Status', type: 'select', options: ['Single', 'Married', 'Divorced', 'Widowed'], enabled: true, employee_editable: true },
-      { id: 'nationality', label: 'Nationality', type: 'text', enabled: true, employee_editable: true },
-      { id: 'country_of_residence', label: 'Country of Residence', type: 'text', enabled: true, employee_editable: true }
-    ]
-  }
-};
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DB_FILE = isVercel
+  ? path.join('/tmp', 'hrms_data.json')
+  : path.join(__dirname, 'data.json');
 
 class JSONDatabase {
   constructor() {
@@ -61,20 +18,36 @@ class JSONDatabase {
   }
 
   init() {
-    if (!fs.existsSync(DB_FILE)) {
-      this.data = { ...defaultData };
-      this.saveSync();
-    } else {
-      try {
-        const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        this.data = JSON.parse(raw);
-        this.migrateUserRoles();
-      } catch (err) {
-        console.error('Error reading DB file, resetting to default:', err);
-        this.data = { ...defaultData };
-        this.saveSync();
+    const candidateFiles = [
+      DB_FILE,
+      path.join(__dirname, 'data.json'),
+      path.join(process.cwd(), 'server', 'db', 'data.json'),
+      path.join(process.cwd(), 'data.json')
+    ];
+
+    let loaded = false;
+    for (const file of candidateFiles) {
+      if (fs.existsSync(file)) {
+        try {
+          const raw = fs.readFileSync(file, 'utf-8');
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.users) && parsed.users.length > 0) {
+            this.data = parsed;
+            loaded = true;
+            break;
+          }
+        } catch (err) {
+          console.warn(`Error reading database file at ${file}:`, err.message);
+        }
       }
     }
+
+    if (!loaded) {
+      this.data = JSON.parse(JSON.stringify(defaultData));
+    }
+
+    this.migrateUserRoles();
+    this.saveSync();
   }
 
   migrateUserRoles() {
@@ -107,11 +80,15 @@ class JSONDatabase {
 
   saveSync() {
     try {
+      const dir = path.dirname(DB_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
       const tempFile = `${DB_FILE}.tmp`;
       fs.writeFileSync(tempFile, JSON.stringify(this.data, null, 2), 'utf-8');
       fs.renameSync(tempFile, DB_FILE);
     } catch (err) {
-      console.error('Failed to write database file:', err);
+      console.warn('Failed to write database file (in-memory state preserved):', err.message);
     }
   }
 

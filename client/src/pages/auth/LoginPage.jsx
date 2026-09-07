@@ -165,7 +165,7 @@ export const LoginPage = ({ onNavigateToForgot }) => {
                 type="button"
                 onClick={() => {
                   setEmail('hr.admin@company.com');
-                  setPassword('employee123');
+                  setPassword('admin123');
                 }}
                 className="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors text-center"
               >
@@ -184,7 +184,7 @@ export const LoginPage = ({ onNavigateToForgot }) => {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('marcus.vance@company.com');
+                  setEmail('employee.alex@company.com');
                   setPassword('employee123');
                 }}
                 className="px-2 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-center"
